@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  #clickerContainer {
+    position: relative;
+  }
+
+  #clicker {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  #upgradeButton {
+    background-color: black;
+    border: 1px solid white;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    color: white;
+  }
+
+  #passiveUpgradeButton {
+    background-color: black;
+    border: 1px solid white;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: white;
+    display: none;
+  }
+
+  #score {
+    margin-bottom: 20px;
+  }
+
+  .red-clicker {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: red;
+    position: absolute;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<p>Posiadane punkty: <span id="currentScore">0</span></p>
+<div id="clickerContainer">
+  <div id="clicker">
+    <p id="clickerScore">0</p>
+    <p>Kliknij, aby zdobyć punkty</p>
+  </div>
+</div>
+<button id="upgradeButton">1.1x kliknięcia koszt 100</button>
+<button id="passiveUpgradeButton">+1 pasywny przychód koszt 2000</button>
+
+<script>
+  let totalScore = 0;
+  let clickValue = 1;
+  let upgradeCost = 100;
+  let passiveUpgradeCost = 2000;
+  let passiveIncome = 0;
+  let criticalChance = 1;
+
+  const currentScoreElement = document.getElementById("currentScore");
+  const clicker = document.getElementById("clicker");
+  const clickerContainer = document.getElementById("clickerContainer");
+  const clickerScoreElement = document.getElementById("clickerScore");
+  const upgradeButton = document.getElementById("upgradeButton");
+  const passiveUpgradeButton = document.getElementById("passiveUpgradeButton");
+
+  clicker.addEventListener("click", () => {
+    if (Math.random() < criticalChance / 100) {
+      totalScore += clickValue * 10;
+    } else {
+      totalScore += clickValue;
+    }
+
+    currentScoreElement.textContent = totalScore;
+    clickerScoreElement.textContent = totalScore;
+
+    if (totalScore >= 1000) {
+      passiveUpgradeButton.style.display = "block";
+    }
+  });
+
+  upgradeButton.addEventListener("click", () => {
+    if (totalScore >= upgradeCost) {
+      totalScore -= upgradeCost;
+      clickValue *= 1.1;
+      upgradeCost *= 2;
+      currentScoreElement.textContent = totalScore;
+      upgradeButton.textContent = `1.1x kliknięcia koszt ${upgradeCost}`;
+    }
+  });
+
+  passiveUpgradeButton.addEventListener("click", () => {
+    if (totalScore >= passiveUpgradeCost) {
+      totalScore -= passiveUpgradeCost;
+      passiveIncome += 1;
+      passiveUpgradeCost *= 2;
+      currentScoreElement.textContent = totalScore;
+      updatePassiveIncome();
+    }
+  });
+
+  function updatePassiveIncome() {
+    setInterval(() => {
+      totalScore += passiveIncome;
+      currentScoreElement.textContent = totalScore;
+      clickerScoreElement.textContent = totalScore;
+    }, 1000);
+  }
+
+  function createRedClicker() {
+    const redClicker = document.createElement("div");
+    redClicker.className = "red-clicker";
+    redClicker.style.width = "50px";
+    redClicker.style.height = "50px";
+    redClicker.style.left = Math.random() * (window.innerWidth - 50) + "px";
+    redClicker.style.top = Math.random() * (window.innerHeight - 50) + "px";
+
+    redClicker.addEventListener("click", () => {
+      totalScore += clickValue * 5;
+      currentScoreElement.textContent = totalScore;
+      clickerScoreElement.textContent = totalScore;
+      redClicker.remove();
+    });
+
+    clickerContainer.appendChild(redClicker);
+
+    setTimeout(() => {
+      redClicker.remove();
+    }, 3000);
+  }
+
+  function spawnRedClickerRandomly() {
+    createRedClicker();
+    setTimeout(spawnRedClickerRandomly, 20000);
+  }
+
+  spawnRedClickerRandomly();
+</script>
+</body>
+</html>
